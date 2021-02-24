@@ -149,6 +149,11 @@ public class ArrivalAdapter extends RecyclerView.Adapter<ArrivalAdapter.MyViewHo
         }
     }
 
+    public void update(ArrayList<ArrivalClass> list){
+        ArrivalList = list;
+        notifyDataSetChanged();
+    }
+
     public interface OnItemListener{
         void onItemClick(int position, ArrivalClass Service);
         void onTimingClick(int position);

@@ -48,11 +48,9 @@ import sg.tgonet.singtransport.Adapter.ArrivalAdapter;
 import sg.tgonet.singtransport.Adapter.HomeAdapter;
 import sg.tgonet.singtransport.BusRoute;
 import sg.tgonet.singtransport.FragmentListener;
-import sg.tgonet.singtransport.Fragments.BusRouteFragment;
 import sg.tgonet.singtransport.Class.ArrivalClass;
 import sg.tgonet.singtransport.Class.ListOfArrivalClass;
-import sg.tgonet.singtransport.Fragments.MapFragment;
-import sg.tgonet.singtransport.Fragments.SearchFragment;
+import sg.tgonet.singtransport.Lib;
 import sg.tgonet.singtransport.MainActivity;
 import sg.tgonet.singtransport.Map;
 import sg.tgonet.singtransport.Notifications.AlarmReceiver;
@@ -68,12 +66,13 @@ public class HomeFragment extends Fragment implements ArrivalAdapter.OnItemListe
     String[] BusNumberList;
     RecyclerView rv;
     HomeAdapter adapter;
+    Lib lib = new Lib(getContext(),getActivity());
 
 
     @Override
     public void onResume() {
         super.onResume();
-        FavouriteBusStopList = MainActivity.loadFavouriteData(getContext());
+        FavouriteBusStopList = lib.loadFavouriteData(getContext());
         buildItemList(FavouriteBusStopList);
         adapter.notifyDataSetChanged();
     }
@@ -82,7 +81,7 @@ public class HomeFragment extends Fragment implements ArrivalAdapter.OnItemListe
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
-        FavouriteBusStopList = MainActivity.loadFavouriteData(getContext());
+        FavouriteBusStopList = lib.loadFavouriteData(getContext());
 
         cardView = root.findViewById(R.id.cardView);
         cardView.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +123,7 @@ public class HomeFragment extends Fragment implements ArrivalAdapter.OnItemListe
             public void onBackStackChanged() {
                 if(MainActivity.fm != null){
                     if(MainActivity.fm.getBackStackEntryCount() == 0){
-                        FavouriteBusStopList = MainActivity.loadFavouriteData(getContext());
+                        FavouriteBusStopList = lib.loadFavouriteData(getContext());
                         buildItemList(FavouriteBusStopList);
                         adapter.notifyDataSetChanged();
                     }
@@ -450,7 +449,7 @@ public class HomeFragment extends Fragment implements ArrivalAdapter.OnItemListe
             FavouriteBusStopList.remove(first);
         }
 
-        MainActivity.saveFavouriteData(FavouriteBusStopList,getContext());
+        lib.saveFavouriteData(FavouriteBusStopList,getContext());
         adapter.notifyDataSetChanged();
     }
 }

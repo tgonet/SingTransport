@@ -39,6 +39,7 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
     BusStopServiceAdapter adapter;
     ArrayList<Buses> newList;
     InputMethodManager imm;
+    Lib lib = new Lib(getApplicationContext(),this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +52,8 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
         searchBar.requestFocus();
         searchBar.setFocusable(true);
         searchBar.setFocusableInTouchMode(true);
-        BusNumberList = loadBusServiceList(getApplicationContext());
-        BusStopList = loadBusStopList(getApplicationContext());
+        BusNumberList = lib.loadBusServiceList(getApplicationContext(),this);
+        BusStopList = lib.loadBusStopList(getApplicationContext(),this);
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -110,28 +111,7 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
         rv.setAdapter(adapter);
     }
 
-    public static ArrayList<BusStopClass> loadBusStopList(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("BusStopListFile", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("BusStopList", null);
-        Type type = new TypeToken<ArrayList<BusStopClass>>() {
-        }.getType();
-        ArrayList<BusStopClass> BusStopList = gson.fromJson(json, type);
-        return BusStopList;
-    }
-
-    public static ArrayList<BusServiceClass> loadBusServiceList(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("BusNumberListFile", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("BusNumberList", null);
-        Type type = new TypeToken<ArrayList<BusServiceClass>>() {
-        }.getType();
-        ArrayList<BusServiceClass> BusNumberList = gson.fromJson(json, type);
-
-        return BusNumberList;
-    }
-
-    @Override
+   @Override
     public void onItemClick(int position) {
         if(newList.get(position).getClass() == BusStopClass.class){
             Intent intent = new Intent(Search.this, Timing.class );
@@ -140,25 +120,12 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
             intent.putExtra("RoadName",((BusStopClass) newList.get(position)).getRoadName());
             imm.hideSoftInputFromWindow(Search.this.getCurrentFocus().getWindowToken(), 0);
             startActivity(intent);
-//            BusStopClass object = ((BusStopClass) newList.get(position));
-//            FragmentTransaction ft = Search.this.getSupportFragmentManager().beginTransaction();
-//            TimingFragment fragmentDemo = TimingFragment.newInstance(object.getBusStopCode(),object.getDescription(),object.getRoadName());
-//            ft.replace(R.id.nav_host_fragment, fragmentDemo).addToBackStack(null).commit();
-            //ft.addToBackStack(null);
-            //ft.commit();
         }
         else{
             Intent intent = new Intent(Search.this, BusRoute.class);
             intent.putExtra("ServiceNo", ((BusServiceClass) newList.get(position)).getServiceNo());
             imm.hideSoftInputFromWindow(Search.this.getCurrentFocus().getWindowToken(), 0);
             startActivity(intent);
-//            BusServiceClass object = ((BusServiceClass) newList.get(position));
-//            Log.d("HI", object.getServiceNo());
-//            FragmentTransaction ft = getParentFragmentManager().beginTransaction();
-//            BusRouteFragment busRouteFragment = BusRouteFragment.newInstance(object.getServiceNo(), null);
-//            ft.replace(R.id.nav_host_fragment, busRouteFragment);
-//            ft.addToBackStack(null);
-//            ft.commit();
         }
     }
 

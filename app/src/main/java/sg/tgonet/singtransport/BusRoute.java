@@ -20,7 +20,6 @@ import sg.tgonet.singtransport.Adapter.BusStopAdapter;
 import sg.tgonet.singtransport.Adapter.BusStopServiceAdapter;
 import sg.tgonet.singtransport.Class.BusStopClass;
 import sg.tgonet.singtransport.Class.Buses;
-import sg.tgonet.singtransport.Fragments.SearchFragment;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
@@ -35,6 +34,7 @@ public class BusRoute extends AppCompatActivity implements BusStopAdapter.OnItem
     RecyclerView rv;
     BusStopAdapter adapter;
     boolean check;
+    Lib lib = new Lib(getApplicationContext(),this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,7 @@ public class BusRoute extends AppCompatActivity implements BusStopAdapter.OnItem
         check = true;
         direction = "a";
 
-        BusStopList = SearchFragment.loadBusStopList(getApplicationContext());
+        BusStopList = lib.loadBusStopList(getApplicationContext(),this);
         DisplayList = getDisplayList(direction + serviceNo,BusStopCode);
 
         BusNumber = findViewById(R.id.BusNumber);

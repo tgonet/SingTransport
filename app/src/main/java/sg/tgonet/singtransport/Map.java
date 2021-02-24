@@ -93,6 +93,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
     private static final int REQUEST_CODE = 101;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    Lib lib = new Lib(getApplicationContext(),this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,11 +102,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
         getWindow().setStatusBarColor(ContextCompat.getColor(Map.this, R.color.colorPrimary));
 
-        FavouriteBusStop = MainActivity.loadFavouriteData(getApplicationContext());
-        BusStopList = MainActivity.loadBusStopList(getApplicationContext(),this);
+        FavouriteBusStop = lib.loadFavouriteData(getApplicationContext());
+        BusStopList = lib.loadBusStopList(getApplicationContext(),this);
         storage = NearestStops(new LatLng(1.28941, 103.8022));
         expandableListView = findViewById(R.id.ExpandList);
-        //new help().execute();
         busStopListAdapter = new BusStopListAdapter(getApplicationContext(),storage,new HashMap<BusStopClass, ArrayList<ArrivalClass>>(),getInitials(storage),this);
         busStopListAdapter.setArrivalList(getList(storage,busStopListAdapter));
         expandableListView.setAdapter(busStopListAdapter);
@@ -127,143 +127,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
         mapFragment.getMapAsync(this);
     }
 
-    public class help2 extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            return null;
-        }
-    }
-
-/*    private class help extends AsyncTask<Void, Void, BusStopListAdapter> implements BusStopListAdapter.OnItemClickListener {
-
-        @Override
-        protected BusStopListAdapter doInBackground(Void... voids) {
-            busStopListAdapter = new BusStopListAdapter(getApplicationContext(),storage,new HashMap<BusStopClass, ArrayList<ArrivalClass>>(),getInitials(storage),this);
-            return busStopListAdapter;
-        }
-
-        @Override
-        public void onFavouriteClick(int groupPosition, int childPosition) {
-            int help = 0;
-            ArrayList<ArrivalClass> buslist = new ArrayList<>();
-            BusStopClass busObject = busStopListAdapter.getHeaders().get(groupPosition);
-            ArrivalClass object = busStopListAdapter.getArrivalList().get(busStopListAdapter.getHeaders().get(groupPosition)).get(childPosition);
-            if(object.getFavourite()){
-                object.setFavourite(false);
-                for(ListOfArrivalClass i : FavouriteBusStop){
-                    if(i.busStopClass.getBusStopCode().equals(busStopListAdapter.getHeaders().get(groupPosition).getBusStopCode())){
-                        for(ArrivalClass j : i.arrivalClasses){
-                            if(j.getServiceNo().equals(object.getServiceNo())){
-                                i.arrivalClasses.remove(j);
-                                break;
-                            }
-                        }
-                        if(i.arrivalClasses.size() == 0){
-                            FavouriteBusStop.remove(i);
-                        }
-                        break;
-                    }
-                }
-            }
-            else {
-                object.setFavourite(true);
-
-                for (ListOfArrivalClass i : FavouriteBusStop) {
-                    if (i.busStopClass.getBusStopCode().equals(busObject.getBusStopCode())) {
-                        help = 1;
-                        i.arrivalClasses.add(new ArrivalClass(object.getServiceNo(), "0", "0", "0", "0", "0", "0", true));
-                        break;
-                    }
-                }
-                if (help == 0) {
-                    buslist.add(new ArrivalClass(object.getServiceNo(), "0", "0", "0", "0", "0", "0", true));
-                    FavouriteBusStop.add(new ListOfArrivalClass(new BusStopClass(busObject.getBusStopCode(), busObject.getDescription(), busObject.getRoadName(), 0.0, 0.0), buslist));
-                }
-            }
-            busStopListAdapter.notifyDataSetChanged();
-            HomeFragment.saveFavouriteData(FavouriteBusStop, getApplicationContext());
-        }
-
-        @Override
-        public void onAlarmClick(int groupPosition, int childPosition) {
-            int i = 0;
-            boolean check = false;
-            ArrivalClass object = busStopListAdapter.getArrivalList().get(busStopListAdapter.getHeaders().get(groupPosition)).get(childPosition);
-            String timing1 = object.getTiming();
-            String timing2  = object.getTiming2();
-            String timing3  = object.getTiming3();
-            if(!timing1.equals("Left") && !timing1.equals("Arr")){
-                if(Integer.parseInt(timing1) > 3){
-                    i = Integer.parseInt(timing1);
-                    check = true;
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-                }
-            }
-            else if(!timing2.equals("Left") && !timing2.equals("Arr")){
-                if(Integer.parseInt(timing2) > 3){
-                    i = Integer.parseInt(timing2);
-                    check = true;
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-                }
-            }
-            else{
-                if(!timing3.equals("Left") && !timing3.equals("Arr")){
-                    if(Integer.parseInt(timing3) > 3){
-                        i = Integer.parseInt(timing3);
-                        check = true;
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"Please wait for the next bus arrival update",Toast.LENGTH_SHORT).show();
-                }
-            }
-            if(check) {
-                AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                Bundle bundle = new Bundle();
-                bundle.putString("BusNumber", object.getServiceNo());
-                Intent myIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
-                myIntent.putExtras(bundle);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                manager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + ((i - 3) * 1000 * 60), pendingIntent);
-                Toast.makeText(getApplicationContext(), "Alarm has been set", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public void onItemClick(int groupPosition, int childPosition) {
-            String busStopCode = busStopListAdapter.getHeaders().get(groupPosition).getBusStopCode();
-            String serviceNo =  busStopListAdapter.getArrivalList().get(busStopListAdapter.getHeaders().get(groupPosition)).get(childPosition).getServiceNo();
-            Intent intent = new Intent(getApplicationContext(),BusRoute.class);
-            intent.putExtra("ServiceNo",serviceNo);
-            intent.putExtra("BusStopCode",busStopCode);
-            intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivity(intent);
-        }
-
-        @Override
-        protected void onPostExecute(BusStopListAdapter busStopListAdapter) {
-            super.onPostExecute(busStopListAdapter);
-            busStopListAdapter.setArrivalList(getList(storage,busStopListAdapter));
-            expandableListView.setAdapter(busStopListAdapter);
-        }
-    }*/
-
-
-
     public HashMap<BusStopClass,ArrayList<ArrivalClass>> getList(ArrayList<BusStopClass> BusStopList,BusStopListAdapter busStopListAdapter){
         HashMap<BusStopClass,ArrayList<ArrivalClass>> arrivallist = new HashMap<>();
         int count = 0;
         ArrayList<ArrivalClass> hi = new ArrayList<>();
-        if(isNetworkAvailable()){
+        if(lib.isNetworkAvailable()){
             for(BusStopClass i : BusStopList){
                 arrivallist.put(i,getData(i.getBusStopCode(), count,busStopListAdapter));
                 count++;
@@ -296,16 +164,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
         }
 
         return arrivallist;
-    }
-
-    public ArrayList<BusStopClass> loadBusStopList(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("BusStopListFile", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("BusStopList", null);
-        Type type = new TypeToken<ArrayList<BusStopClass>>() {
-        }.getType();
-        ArrayList<BusStopClass> BusStopList = gson.fromJson(json, type);
-        return BusStopList;
     }
 
     public ArrayList<String> getInitials(ArrayList<BusStopClass> NearestList){
@@ -615,7 +473,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
     @Override
     public void onCameraIdle() {
-        new help2().execute();
         LatLng position = map.getCameraPosition().target;
         storage = NearestStops(position);
         aList = getInitials(storage);
@@ -688,7 +545,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
             }
         }
         busStopListAdapter.notifyDataSetChanged();
-        MainActivity.saveFavouriteData(FavouriteBusStop, getApplicationContext());
+        lib.saveFavouriteData(FavouriteBusStop, getApplicationContext());
     }
 
     @Override
@@ -753,13 +610,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
         intent.putExtra("BusStopCode",busStopCode);
         intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) Map.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
 
