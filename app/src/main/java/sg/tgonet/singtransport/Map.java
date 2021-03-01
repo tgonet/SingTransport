@@ -19,6 +19,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -76,6 +78,8 @@ import sg.tgonet.singtransport.ui.home.HomeFragment;
 
 public class Map extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener, BusStopListAdapter.OnItemClickListener {
 
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private static final int REQUEST_CODE = 101;
     int resourceId;
     String[] busNos;
     ArrayList<String> aList;
@@ -84,15 +88,11 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
     ExpandableListView expandableListView;
     BusStopListAdapter busStopListAdapter;
     ArrayList<ArrivalClass> ArrivalList;
-
     GoogleMap map;
     SupportMapFragment mapFragment;
     IconGenerator iconGenerator;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
-
-    private static final int REQUEST_CODE = 101;
-    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     Lib lib;
 
     @Override
@@ -140,7 +140,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
         }
         else{
             for(BusStopClass i : BusStopList){
-                hi = new ArrayList<>();
                 resourceId = this.getResources().getIdentifier("a" + i.getBusStopCode(), "array", Map.this.getPackageName());
                 busNos = getResources().getStringArray(resourceId)[0].split(",");
                 for(String j : busNos){
@@ -227,8 +226,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
                             JSONObject jsonObject = null;
                             try {
                                 jsonObject = new JSONObject(myResponse);
-                                // Do something here
-
                                 JSONArray Array = jsonObject.getJSONArray("Services");
                                 for (int i = 0; i < Array.length(); i++) {
                                     JSONObject object = Array.getJSONObject(i);
@@ -353,6 +350,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
                                     ArrivalList.add(new ArrivalClass(ServiceNo, timing1, timing2, timing3, load1, load2, load3,lat1,lag1,lat2,lag2,lat3,lag3,false));
                                 }
 
+                                // Adds in the buses that are not available at this moment
+                                // which ae not shown from getData
                                 for(String k : busNos){
                                     boolean checker = false;
                                     for(ArrivalClass j : ArrivalList){
@@ -365,12 +364,12 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
                                     }
                                 }
 
+                                // Set the favourites
                                 for(ListOfArrivalClass j : FavouriteBusStop){
                                     if(j.busStopClass.getBusStopCode().equals(BusStopCode)){
                                         for(ArrivalClass k : j.arrivalClasses){
                                             for(ArrivalClass z : ArrivalList){
                                                 if(k.getServiceNo().equals(z.getServiceNo())){
-
                                                     z.setFavourite(true);
                                                     break;
                                                 }
@@ -379,8 +378,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
                                         break;
                                     }
                                 }
-
                                 busStopListAdapter.updateitem(ArrivalList,position);
+
+
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -477,7 +478,13 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
         LatLng position = map.getCameraPosition().target;
         storage = NearestStops(position);
         aList = getInitials(storage);
-        busStopListAdapter.Update(storage,aList,getList(storage,busStopListAdapter));
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                busStopListAdapter.Update(storage,aList,getList(storage,busStopListAdapter));
+            }
+        }, 300);
         if (map != null) {
             map.clear();
         }
