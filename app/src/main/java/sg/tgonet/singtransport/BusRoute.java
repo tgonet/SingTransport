@@ -34,7 +34,7 @@ public class BusRoute extends AppCompatActivity implements BusStopAdapter.OnItem
     RecyclerView rv;
     BusStopAdapter adapter;
     boolean check;
-    Lib lib = new Lib(getApplicationContext(),this);
+    Lib lib;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,8 @@ public class BusRoute extends AppCompatActivity implements BusStopAdapter.OnItem
         setContentView(R.layout.activity_bus_route);
 
         getWindow().setStatusBarColor(ContextCompat.getColor(BusRoute.this, R.color.colorPrimary));
+
+        lib = new Lib(getApplicationContext(),this);
 
         serviceNo = getIntent().getStringExtra("ServiceNo");
         BusStopCode = getIntent().getStringExtra("BusStopCode");

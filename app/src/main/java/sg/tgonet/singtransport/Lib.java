@@ -345,7 +345,7 @@ public class Lib {
     }
 
     public void alarmClick(ArrivalClass object){
-        /*int i = 0;
+        int i = 0;
         boolean check = false;
         String timing1 = object.getTiming();
         String timing2  = object.getTiming2();
@@ -393,6 +393,5 @@ public class Lib {
             manager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + ((i - 3) * 1000 * 60), pendingIntent);
             Toast.makeText(context, "Alarm has been set", Toast.LENGTH_SHORT).show();
         }
-    }*/
     }
 }

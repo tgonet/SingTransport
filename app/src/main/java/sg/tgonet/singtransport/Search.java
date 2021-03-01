@@ -39,7 +39,8 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
     BusStopServiceAdapter adapter;
     ArrayList<Buses> newList;
     InputMethodManager imm;
-    Lib lib = new Lib(getApplicationContext(),this);
+    Lib lib;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class Search extends AppCompatActivity implements BusStopServiceAdapter.O
 
         getWindow().setStatusBarColor(ContextCompat.getColor(Search.this, R.color.colorPrimary));
 
+        lib = new Lib(getApplicationContext(),this);
         searchBar = findViewById(R.id.searchBar);
         searchBar.requestFocus();
         searchBar.setFocusable(true);

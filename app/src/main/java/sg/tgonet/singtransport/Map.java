@@ -1,4 +1,4 @@
-package sg.tgonet.singtransport;
+ package sg.tgonet.singtransport;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -93,7 +93,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
     private static final int REQUEST_CODE = 101;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    Lib lib = new Lib(getApplicationContext(),this);
+    Lib lib;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +102,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
         getWindow().setStatusBarColor(ContextCompat.getColor(Map.this, R.color.colorPrimary));
 
+        lib = new Lib(getApplicationContext(),this);
         FavouriteBusStop = lib.loadFavouriteData(getApplicationContext());
         BusStopList = lib.loadBusStopList(getApplicationContext(),this);
         storage = NearestStops(new LatLng(1.28941, 103.8022));
@@ -550,55 +551,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback, Google
 
     @Override
     public void onAlarmClick(int groupPosition, int childPosition) {
-        int i = 0;
-        boolean check = false;
         ArrivalClass object = busStopListAdapter.getArrivalList().get(busStopListAdapter.getHeaders().get(groupPosition)).get(childPosition);
-        String timing1 = object.getTiming();
-        String timing2  = object.getTiming2();
-        String timing3  = object.getTiming3();
-        if(!timing1.equals("Left") && !timing1.equals("Arr")){
-            if(Integer.parseInt(timing1) > 3){
-                i = Integer.parseInt(timing1);
-                check = true;
-            }
-            else{
-                Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-            }
-        }
-        else if(!timing2.equals("Left") && !timing2.equals("Arr")){
-            if(Integer.parseInt(timing2) > 3){
-                i = Integer.parseInt(timing2);
-                check = true;
-            }
-            else{
-                Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-            }
-        }
-        else{
-            if(!timing3.equals("Left") && !timing3.equals("Arr")){
-                if(Integer.parseInt(timing3) > 3){
-                    i = Integer.parseInt(timing3);
-                    check = true;
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"Bus is arriving soon",Toast.LENGTH_SHORT).show();
-                }
-            }
-            else{
-                Toast.makeText(getApplicationContext(),"Please wait for the next bus arrival update",Toast.LENGTH_SHORT).show();
-            }
-        }
-        if(check) {
-            AlarmManager manager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-            Bundle bundle = new Bundle();
-            bundle.putString("BusNumber", object.getServiceNo());
-            Intent myIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
-            myIntent.putExtras(bundle);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            manager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + ((i - 3) * 1000 * 60), pendingIntent);
-            Toast.makeText(getApplicationContext(), "Alarm has been set", Toast.LENGTH_SHORT).show();
-        }
+        lib.alarmClick(object);
     }
 
     @Override
